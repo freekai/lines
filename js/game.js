@@ -236,6 +236,8 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
     cnvs = document.getElementById("playground");
     scoreBoard = document.getElementById("score");
     draw.initCanvas(cnvs);
+    var footer = document.getElementById("footer");
+    footer.style.width = cnvs.style.width;
     newBalls();
     cnvs.addEventListener("click", select);
     cnvs.addEventListener("doneAnimating", checkAndInsert);

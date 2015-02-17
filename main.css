@@ -1,33 +1,36 @@
 body {
     background-color: #cccccc;
-}
-
-#playground-container {
     text-align: center;
-    vertical-align: center;
-    margin: 10px;
 }
 
 #footer {
-    text-align: right;
-    vertical-align: middle;
-    margin: 10px;
+    height: 60px;
+    position: relative;
+    margin: 20px auto;
 }
 
 #scoreboard {  
-    border-radius: 6px 6px 6px 6px;
+    border-radius: 6px;
     background-color: #666;
     color: white;
     font-family: Lucida Console, monospace;
     font-weight: bold;
     font-size: 16px;
     padding: 10px;
-    display: inline-block;
-    float: right;
+    margin-right: 10px;
 }
 
 #nextballs-container {
+    display: inline;
+    position: absolute;
+    top: 0;
+    left: 0;
     height: 60px;
-    float: left;
-    display: inline-block;
+}
+#scoreboard-container {
+    display: flex;
+    float: right;
+    flex-direction: column;
+    justify-content: center;
+    height: 60px;
 }
