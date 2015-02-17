@@ -1,0 +1,12 @@
+{
+    "jslint.options": {
+        "vars": true,
+        "plusplus": true,
+        "nomen": true
+    },
+    "language": {
+        "html": {
+            "spaceUnits": 2
+        }
+    }
+}
