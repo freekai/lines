@@ -37,7 +37,8 @@ define(["config"], function (config) {
     return {
         field: field,
         idx: idx,
-        isInside: isInside
+        isInside: isInside,
+        initField: initField
     };
         
 });
