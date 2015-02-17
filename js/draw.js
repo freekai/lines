@@ -1,4 +1,4 @@
-/*global define:false, Event:false, window:false, document:false, setInterval:false, console:false, CustomEvent:false */
+/*global define:false, window:false, document:false, setInterval:false, setTimeout:false, CustomEvent:false */
 define(["field", "config"], function (field, config) {
     "use strict";
     
@@ -9,6 +9,7 @@ define(["field", "config"], function (field, config) {
         cfg = config.draw,
         fieldSize = config.game.size;
 
+    var noPathWarn;
     
     function drawField() {
         var grad,
@@ -210,6 +211,56 @@ define(["field", "config"], function (field, config) {
         animPathState.stop = false;
     }
     
+    function _offset() {
+        var elem = document.getElementById("playground"),
+            elemBounds = elem.getBoundingClientRect(),
+            body = window.document.body,
+            offsetTop,
+            offsetLeft;
+
+        if (window.getComputedStyle(body).position === "static") {
+            offsetLeft = elemBounds.left + window.pageXOffset;
+            offsetTop = elemBounds.top + window.pageYOffset;
+        } else {
+            var bodyBounds = body.getBoundingClientRect();
+            offsetLeft = elemBounds.left - bodyBounds.left;
+            offsetTop = elemBounds.top - bodyBounds.top;
+        }
+        return { left: offsetLeft, top: offsetTop };
+    }
+    
+    function warnNoPath() {
+        var offset = _offset();
+        if (noPathWarn) {
+            return;
+        }
+        noPathWarn = document.createElement("div");
+        noPathWarn.style.position = "absolute";
+        noPathWarn.style.width = cnvs.style.width;
+        noPathWarn.style.height = cnvs.style.height;
+        noPathWarn.style.display = "flex";
+        noPathWarn.style.justifyContent = "center";
+        noPathWarn.style.alignItems = "center";
+        noPathWarn.style.fontWeight = "bold";
+        noPathWarn.style.fontSize = "25px";
+        noPathWarn.innerHTML = "Cannot find path";
+        noPathWarn.style.color = "rgb(255, 0, 0)";
+        noPathWarn.style.backgroundColor = "rgba(255, 125, 125, 0.5)";
+        noPathWarn.style.transitionProperty = "opacity";
+        noPathWarn.style.transitionDuration = "1s";
+        noPathWarn.style.left = offset.left + "px";
+        noPathWarn.style.top = offset.top + "px";
+        
+        document.body.appendChild(noPathWarn);
+        setTimeout(function () {
+            document.body.removeChild(noPathWarn);
+            noPathWarn = null;
+        }, 1000);
+        setTimeout(function () {
+            noPathWarn.style.opacity = 0;
+        }, 20);
+    }
+    
     setInterval(animateSelected, 100);
     setInterval(animatePath, 100);
     
@@ -220,6 +271,7 @@ define(["field", "config"], function (field, config) {
         eraseCell: eraseCell,
         moveBall: moveBall,
         setSelection: function (cell) { sel = cell; },
-        getSelection: function () { return sel; }
+        getSelection: function () { return sel; },
+        warnNoPath: warnNoPath
     };
 });

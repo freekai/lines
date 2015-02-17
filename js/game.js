@@ -123,7 +123,7 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
                 draw.moveBall(sel.i, sel.j, path);
                 draw.setSelection((sel = null));
             } else {
-                window.alert("cannot find path");
+                draw.warnNoPath();
             }
         }
     }
