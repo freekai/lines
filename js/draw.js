@@ -4,6 +4,7 @@ define(["field", "config"], function (field, config) {
     
     var cnvs,
         ctx,
+        scale,
         sel, // current selection
         cfg = config.draw,
         fieldSize = config.game.size;
@@ -22,13 +23,13 @@ define(["field", "config"], function (field, config) {
         ctx.strokeStyle = "#eee";
         ctx.shadowColor = "#999";
         ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = cfg.cellMargin / 2;
+        ctx.shadowOffsetY = cfg.cellMargin / 2 * scale;
         for (i = 0, offset = 2; i < fieldSize + 1; i++, offset += cfg.cellMargin + cfg.cellSize) {
             ctx.moveTo(0, offset);
             ctx.lineTo(cnvs.width, offset);
             ctx.stroke();
         }
-        ctx.shadowOffsetX = cfg.cellMargin / 2;
+        ctx.shadowOffsetX = cfg.cellMargin / 2 * scale;
         ctx.shadowOffsetY = 0;
         for (i = 0, offset = 2; i < fieldSize + 1; i++, offset += cfg.cellMargin + cfg.cellSize) {
             ctx.moveTo(offset, 0);
@@ -56,6 +57,7 @@ define(["field", "config"], function (field, config) {
         var size = config.game.size * (cfg.cellSize + cfg.cellMargin) + cfg.cellMargin * 1.5,
             pixRatio = window.devicePixelRatio || 1;
         cnvs = elem;
+        scale = pixRatio;
         ctx = cnvs.getContext("2d");
         cnvs.width = size * pixRatio;
         cnvs.height = size * pixRatio;
@@ -73,9 +75,9 @@ define(["field", "config"], function (field, config) {
         var grd = ctx.createRadialGradient(x - r * 0.2, y - r * 0.2, 0, x - r * 0.2, y - r * 0.2, r / 2);
         grd.addColorStop(0.0, "#f5f5f5");
         grd.addColorStop(1.0, color);
-        ctx.shadowOffsetX = r * 0.1;
-        ctx.shadowOffsetY = r * 0.1;
-        ctx.shadowBlur = r * 0.1;
+        ctx.shadowOffsetX = r * 0.1 * scale;
+        ctx.shadowOffsetY = r * 0.1 * scale;
+        ctx.shadowBlur = r * 0.1 * scale;
         ctx.strokeStyle = color;
         ctx.fillStyle = grd;
         ctx.lineWidth = 1;
