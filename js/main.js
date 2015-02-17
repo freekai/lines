@@ -1,6 +1,6 @@
 /*global define:false, require: false, document:false */
 require.config({
-    baseUrl: "/js"
+    baseUrl: "js"
 });
 
 /*global define:false, window:false */
