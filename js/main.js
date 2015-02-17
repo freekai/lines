@@ -224,6 +224,8 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
         if (!killBalls(evnt.detail.ball.i, evnt.detail.ball.j)) {
             if (newBalls() < 0) {
                 window.alert("Game over...\n\nYour score: " + scoreBoard.textContent + "!");
+                score = 0;
+                updateScoreBoard();
                 field.initField();
                 draw.initCanvas(cnvs);
                 newBalls();
