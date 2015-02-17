@@ -223,7 +223,7 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
     function checkAndInsert(evnt) {
         if (!killBalls(evnt.detail.ball.i, evnt.detail.ball.j)) {
             if (newBalls() < 0) {
-                window.alert("you lost!");
+                window.alert("Your score: " + scoreBoard.textContent + "!");
             }
         }
     }
