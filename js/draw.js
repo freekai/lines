@@ -3,20 +3,19 @@ define(["field", "config"], function (field, config) {
     "use strict";
     
     var cnvs,
+        ctx,
         sel, // current selection
         cfg = config.draw,
         fieldSize = config.game.size;
 
     
     function drawField() {
-        var ctx,
-            grad,
+        var grad,
             i,
             offset;
         if (!cnvs) {
             return;
         }
-        ctx = cnvs.getContext("2d");
         // draw the field grid
         ctx.beginPath();
         ctx.lineWidth = cfg.cellMargin;
@@ -54,19 +53,23 @@ define(["field", "config"], function (field, config) {
 
     function initCanvas(elem) {
         // calculate size
-        var ctx;
-        var size = config.game.size * (cfg.cellSize + cfg.cellMargin) + cfg.cellMargin * 1.5;
+        var size = config.game.size * (cfg.cellSize + cfg.cellMargin) + cfg.cellMargin * 1.5,
+            pixRatio = window.devicePixelRatio || 1;
         cnvs = elem;
-        cnvs.width = size;
-        cnvs.height = size;
         ctx = cnvs.getContext("2d");
+        cnvs.width = size * pixRatio;
+        cnvs.height = size * pixRatio;
+        if (pixRatio !== 1) {
+            cnvs.style.width = size + 'px';
+            cnvs.style.height = size + 'px';
+            ctx.scale(pixRatio, pixRatio);
+        }
         ctx.fillStyle = "#ddd";
         ctx.fillRect(0, 0, size, size);
         drawField();
     }
 
     function drawBall(x, y, r, color) {
-        var ctx = cnvs.getContext("2d");
         var grd = ctx.createRadialGradient(x - r * 0.2, y - r * 0.2, 0, x - r * 0.2, y - r * 0.2, r / 2);
         grd.addColorStop(0.0, "#f5f5f5");
         grd.addColorStop(1.0, color);
@@ -85,7 +88,6 @@ define(["field", "config"], function (field, config) {
 
     function eraseCell(i, j) {
         var cell = field.field[field.idx(i, j)];
-        var ctx = cnvs.getContext("2d");
         var x, y;
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 0;
@@ -153,7 +155,6 @@ define(["field", "config"], function (field, config) {
 
     function animateSelected() {
         var cell = sel;
-        var ctx;
         var height;
         var dir = -1;
         var ch = animSelState.ch; // current height
@@ -167,7 +168,6 @@ define(["field", "config"], function (field, config) {
         y = cell.ballY;
 
         eraseCell(cell.i, cell.j);
-        ctx = cnvs.getContext("2d");
         ch++;
         if (ch === height) {
             ch = 0;
@@ -193,7 +193,6 @@ define(["field", "config"], function (field, config) {
     }
     
     function moveBall(i, j, path) {
-        var ctx = cnvs.getContext("2d");
         var start = field.field[field.idx(i, j)];
         var color = start.color;
         var h;
