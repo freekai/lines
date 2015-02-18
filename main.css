@@ -5,12 +5,12 @@ body {
 }
 
 #footer {
-    height: 60px;
+    height: 40px;
     position: relative;
-    margin: 20px auto;
+    margin: 5px auto;
 }
 
-#scoreboard {  
+a {
     border-radius: 6px;
     background-color: #666;
     color: white;
@@ -18,7 +18,15 @@ body {
     font-weight: bold;
     font-size: 16px;
     padding: 10px;
+}
+
+#scoreboard, #restart {  
     margin-right: 10px;
+}
+
+#playground {
+    width: 400px;
+    height: 400px;
 }
 
 #nextballs-container {
@@ -26,12 +34,13 @@ body {
     position: absolute;
     top: 0;
     left: 0;
-    height: 60px;
+    height: 40px;
 }
-#scoreboard-container {
+
+#scoreboard-container, #restart-container {
     display: flex;
     float: right;
     flex-direction: column;
     justify-content: center;
-    height: 60px;
+    height: 40px;
 }

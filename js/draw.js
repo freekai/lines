@@ -1,4 +1,4 @@
-/*global define:false, window:false, document:false, setInterval:false, setTimeout:false, CustomEvent:false */
+/*global define:false, window:false, document:false, setInterval:false, setTimeout:false, clearInterval:false, CustomEvent:false */
 define(["field", "config"], function (field, config) {
     "use strict";
     
@@ -9,6 +9,9 @@ define(["field", "config"], function (field, config) {
         sel, // current selection
         cfg = config.draw,
         fieldSize = config.game.size;
+    
+    var animPathTimer,
+        animSelectTimer;
 
     var noPathWarn;
     
@@ -268,8 +271,18 @@ define(["field", "config"], function (field, config) {
         }, 20);
     }
     
-    setInterval(animateSelected, 100);
-    setInterval(animatePath, 100);
+    function startTimers() {
+        animPathTimer = setInterval(animateSelected, 100);
+        animSelectTimer = setInterval(animatePath, 100);
+    }
+    
+    startTimers();
+    
+    function restartTimers() {
+        clearInterval(animPathTimer);
+        clearInterval(animSelectTimer);
+        startTimers();
+    }
     
     return {
         initCanvas: initCanvas,
@@ -279,6 +292,7 @@ define(["field", "config"], function (field, config) {
         moveBall: moveBall,
         setSelection: function (cell) { sel = cell; },
         getSelection: function () { return sel; },
-        warnNoPath: warnNoPath
+        warnNoPath: warnNoPath,
+        restartTimers: restartTimers
     };
 });

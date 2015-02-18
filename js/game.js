@@ -220,15 +220,21 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
         return 0;
     }
 
+    function restartGame() {
+        score = 0;
+        updateScoreBoard();
+        field.initField();
+        draw.setSelection((sel = null));
+        draw.initCanvas(cnvs);
+        draw.restartTimers();
+        newBalls();
+    }
+    
     function checkAndInsert(evnt) {
         if (!killBalls(evnt.detail.ball.i, evnt.detail.ball.j)) {
             if (newBalls() < 0) {
                 window.alert("Game over...\n\nYour score: " + scoreBoard.textContent + "!");
-                score = 0;
-                updateScoreBoard();
-                field.initField();
-                draw.initCanvas(cnvs);
-                newBalls();
+                restartGame();
             }
         }
     }
@@ -238,7 +244,9 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
     draw.initCanvas(cnvs);
     var footer = document.getElementById("footer");
     footer.style.width = cnvs.style.width;
+    var restart = document.getElementById("restart");
     newBalls();
     cnvs.addEventListener("click", select);
     cnvs.addEventListener("doneAnimating", checkAndInsert);
+    restart.addEventListener("click", restartGame);
 });
