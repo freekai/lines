@@ -70,9 +70,9 @@ define(["field", "config"], function (field, config) {
         ctx = cnvs.getContext("2d");
         cnvs.width = size * pixRatio;
         cnvs.height = size * pixRatio;
+        cnvs.style.width = size + 'px';
+        cnvs.style.height = size + 'px';
         if (pixRatio !== 1) {
-            cnvs.style.width = size + 'px';
-            cnvs.style.height = size + 'px';
             ctx.scale(pixRatio, pixRatio);
         }
         ctx.lineJoin = "bevel";
