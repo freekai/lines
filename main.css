@@ -1,6 +1,7 @@
 body {
     background-color: #cccccc;
     text-align: center;
+    overflow-y: hidden;
 }
 
 #footer {
