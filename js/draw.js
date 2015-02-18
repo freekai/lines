@@ -4,6 +4,7 @@ define(["field", "config"], function (field, config) {
     
     var cnvs,
         ctx,
+        nctx, // context of the "next balls" canvas
         scale,
         sel, // current selection
         cfg = config.draw,
@@ -24,40 +25,44 @@ define(["field", "config"], function (field, config) {
         ctx.strokeStyle = "#eee";
         ctx.shadowColor = "#999";
         ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = cfg.cellMargin / 2 * scale;
-        for (i = 0, offset = 2; i < fieldSize + 1; i++, offset += cfg.cellMargin + cfg.cellSize) {
+        ctx.shadowOffsetY = (cfg.cellMargin / 2) * scale;
+        for (i = 0, offset = cfg.cellMargin / 2; i < fieldSize + 1; i++, offset += cfg.cellMargin + cfg.cellSize) {
             ctx.moveTo(0, offset);
-            ctx.lineTo(cnvs.width, offset);
+            ctx.lineTo(cnvs.width / scale, offset);
             ctx.stroke();
         }
-        ctx.shadowOffsetX = cfg.cellMargin / 2 * scale;
+        ctx.shadowOffsetX = (cfg.cellMargin / 2) * scale;
         ctx.shadowOffsetY = 0;
-        for (i = 0, offset = 2; i < fieldSize + 1; i++, offset += cfg.cellMargin + cfg.cellSize) {
+        for (i = 0, offset = cfg.cellMargin / 2; i < fieldSize + 1; i++, offset += cfg.cellMargin + cfg.cellSize) {
             ctx.moveTo(offset, 0);
-            ctx.lineTo(offset, cnvs.height);
+            ctx.lineTo(offset, cnvs.height / scale);
             ctx.stroke();
         }
         ctx.closePath();
         // final touch -- the rightmost border and the bottom one
         ctx.beginPath();
-        ctx.lineWidth = 2;
-        ctx.shadowOffsetX = 0;
+        ctx.lineWidth = cfg.cellMargin;
+        ctx.shadowOffsetX = cfg.cellMargin;
         ctx.shadowOffsetY = 0;
-        ctx.strokeStyle = "#999";
-        ctx.moveTo(0, cnvs.height - cfg.cellMargin / 4);
-        ctx.lineTo(cnvs.width, cnvs.height - cfg.cellMargin / 4);
+        ctx.strokeStyle = "#eee";
+        ctx.shadowColor = "#999";
+        ctx.moveTo(cnvs.width / scale - cfg.cellMargin, 0);
+        ctx.lineTo(cnvs.width / scale - cfg.cellMargin, cnvs.height / scale);
         ctx.stroke();
-        ctx.moveTo(cnvs.width - cfg.cellMargin / 4, 0);
-        ctx.lineTo(cnvs.width - cfg.cellMargin / 4, cnvs.height - cfg.cellMargin / 4);
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = cfg.cellMargin;
+        ctx.moveTo(0, cnvs.height / scale - cfg.cellMargin);
+        ctx.lineTo(cnvs.width / scale, cnvs.height / scale - cfg.cellMargin);
         ctx.stroke();
+
         ctx.closePath();
     }
 
-    function initCanvas(elem) {
+    function initCanvas(c, nc) {
         // calculate size
         var size = config.game.size * (cfg.cellSize + cfg.cellMargin) + cfg.cellMargin * 1.5,
             pixRatio = window.devicePixelRatio || 1;
-        cnvs = elem;
+        cnvs = c;
         scale = pixRatio;
         ctx = cnvs.getContext("2d");
         cnvs.width = size * pixRatio;
@@ -67,6 +72,8 @@ define(["field", "config"], function (field, config) {
             cnvs.style.height = size + 'px';
             ctx.scale(pixRatio, pixRatio);
         }
+        ctx.lineJoin = "bevel";
+        ctx.lineCap = "square";
         ctx.fillStyle = "#ddd";
         ctx.fillRect(0, 0, size, size);
         drawField();
@@ -243,7 +250,7 @@ define(["field", "config"], function (field, config) {
         noPathWarn.style.alignItems = "center";
         noPathWarn.style.fontWeight = "bold";
         noPathWarn.style.fontSize = "25px";
-        noPathWarn.innerHTML = "Cannot find path";
+        noPathWarn.innerHTML = "Cannot move";
         noPathWarn.style.color = "rgb(255, 0, 0)";
         noPathWarn.style.backgroundColor = "rgba(255, 125, 125, 0.5)";
         noPathWarn.style.transitionProperty = "opacity";
