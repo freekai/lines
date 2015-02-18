@@ -83,9 +83,9 @@ define(["field", "config"], function (field, config) {
         var grd = ctx.createRadialGradient(x - r * 0.2, y - r * 0.2, 0, x - r * 0.2, y - r * 0.2, r / 2);
         grd.addColorStop(0.0, "#f5f5f5");
         grd.addColorStop(1.0, color);
-        ctx.shadowOffsetX = r * 0.1 * scale;
-        ctx.shadowOffsetY = r * 0.1 * scale;
-        ctx.shadowBlur = r * 0.1 * scale;
+        ctx.shadowOffsetX = r * 0.1;
+        ctx.shadowOffsetY = r * 0.1;
+        ctx.shadowBlur = r * 0.1;
         ctx.strokeStyle = color;
         ctx.fillStyle = grd;
         ctx.lineWidth = 1;
