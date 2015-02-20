@@ -8,6 +8,7 @@ body {
     height: 40px;
     position: relative;
     margin: 5px auto;
+    visibility: hidden;
 }
 
 a {
@@ -20,8 +21,13 @@ a {
     padding: 10px;
 }
 
-#scoreboard, #restart {  
+#restart {  
     margin-right: 10px;
+}
+
+#score {
+    float: right;
+    text-align: right;
 }
 
 #playground {

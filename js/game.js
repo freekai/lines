@@ -243,6 +243,9 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
     draw.initCanvas(cnvs);
     var footer = document.getElementById("footer");
     footer.style.width = cnvs.style.width;
+    scoreBoard.style.minWidth = scoreBoard.offsetWidth + "px";
+    scoreBoard.textContent = "0";
+    footer.style.visibility = "visible";
     var restart = document.getElementById("restart");
     newBalls();
     cnvs.addEventListener("click", select);
