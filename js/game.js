@@ -163,7 +163,6 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
                 jc -= dj;
             }
             if (line.length > 4) { // got line
-                // TODO: calculate scores and everything
                 // sort and kill
                 var origin = line.shift(),
                     lineSorted = line.sort(sorter),
@@ -224,8 +223,8 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
         score = 0;
         updateScoreBoard();
         field.initField();
-        draw.setSelection((sel = null));
         draw.initCanvas(cnvs);
+        draw.setSelection((sel = null));
         draw.restartTimers();
         newBalls();
     }
