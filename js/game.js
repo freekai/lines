@@ -1,4 +1,4 @@
-/*global define:false, require: false, document:false */
+/*global define:false, require: false, document:false, localStorage: false */
 require.config({
     baseUrl: "js"
 });
@@ -232,7 +232,17 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
     function checkAndInsert(evnt) {
         if (!killBalls(evnt.detail.ball.i, evnt.detail.ball.j)) {
             if (newBalls() < 0) {
-                window.alert("Game over...\n\nYour score: " + scoreBoard.textContent + "!");
+                var maxScore = parseInt(localStorage.getItem("maxScore"), 10);
+                if (isNaN(maxScore)) {
+                    localStorage.setItem("maxScore", 0);
+                    maxScore = 0;
+                }
+                if (score > maxScore) {
+                    localStorage.setItem("maxScore", score);
+                    window.alert("Congratulations!\n\nNew record: " + score);
+                } else {
+                    window.alert("Game over...\n\nYour score is: " + score);
+                }
                 restartGame();
             }
         }
