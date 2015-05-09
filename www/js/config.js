@@ -3,6 +3,8 @@ define(function () {
     "use strict";
     
     return {
+        MAIN_CANVAS: "playground",
+        NEW_BALLS_CANVAS: "nextballs",
         game: {
             size: 9
         },

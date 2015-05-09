@@ -1,10 +1,8 @@
 /*global define:false, window:false, document:false, setInterval:false, setTimeout:false, clearInterval:false, CustomEvent:false */
-define(["field", "config"], function (field, config) {
+define(["config"], function (config) {
     "use strict";
     
-    var cnvs,
-        ctx,
-        nctx, // context of the "next balls" canvas
+    var context = {},
         scale,
         sel, // current selection
         cfg = config.draw,
@@ -14,14 +12,17 @@ define(["field", "config"], function (field, config) {
         animSelectTimer;
 
     var noPathWarn;
-    
-    function drawField() {
+        
+    function _drawField(c, field) {
         var grad,
             i,
-            offset;
-        if (!cnvs) {
+            offset,
+            ctx;
+        if (!c) {
             return;
         }
+        ctx = c.getContext("2d");
+
         // draw the field grid
         ctx.beginPath();
         ctx.lineWidth = cfg.cellMargin;
@@ -29,16 +30,16 @@ define(["field", "config"], function (field, config) {
         ctx.shadowColor = "#999";
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = (cfg.cellMargin / 2) * scale;
-        for (i = 0, offset = cfg.cellMargin / 2; i < fieldSize + 1; i++, offset += cfg.cellMargin + cfg.cellSize) {
+        for (i = 0, offset = cfg.cellMargin / 2; i < field.m + 1; i++, offset += cfg.cellMargin + cfg.cellSize) {
             ctx.moveTo(0, offset);
-            ctx.lineTo(cnvs.width / scale, offset);
+            ctx.lineTo(c.width / scale, offset);
             ctx.stroke();
         }
         ctx.shadowOffsetX = (cfg.cellMargin / 2) * scale;
         ctx.shadowOffsetY = 0;
-        for (i = 0, offset = cfg.cellMargin / 2; i < fieldSize + 1; i++, offset += cfg.cellMargin + cfg.cellSize) {
+        for (i = 0, offset = cfg.cellMargin / 2; i < field.n + 1; i++, offset += cfg.cellMargin + cfg.cellSize) {
             ctx.moveTo(offset, 0);
-            ctx.lineTo(offset, cnvs.height / scale);
+            ctx.lineTo(offset, c.height / scale);
             ctx.stroke();
         }
         ctx.closePath();
@@ -49,41 +50,54 @@ define(["field", "config"], function (field, config) {
         ctx.shadowOffsetY = 0;
         ctx.strokeStyle = "#eee";
         ctx.shadowColor = "#999";
-        ctx.moveTo(cnvs.width / scale - cfg.cellMargin, 0);
-        ctx.lineTo(cnvs.width / scale - cfg.cellMargin, cnvs.height / scale);
+        ctx.moveTo(c.width / scale - cfg.cellMargin, 0);
+        ctx.lineTo(c.width / scale - cfg.cellMargin, c.height / scale);
         ctx.stroke();
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = cfg.cellMargin;
-        ctx.moveTo(0, cnvs.height / scale - cfg.cellMargin);
-        ctx.lineTo(cnvs.width / scale, cnvs.height / scale - cfg.cellMargin);
+        ctx.moveTo(0, c.height / scale - cfg.cellMargin);
+        ctx.lineTo(c.width / scale, c.height / scale - cfg.cellMargin);
         ctx.stroke();
 
         ctx.closePath();
     }
-
-    function initCanvas(c, nc) {
+    
+    function _initCanvas(field) {
         // calculate size
-        var size = config.game.size * (cfg.cellSize + cfg.cellMargin) + cfg.cellMargin * 1.5,
-            pixRatio = window.devicePixelRatio || 1;
-        cnvs = c;
+        var cnvs = document.getElementById(field.id),
+            w = field.n * (cfg.cellSize + cfg.cellMargin) + cfg.cellMargin * 1.5,
+            h = field.m * (cfg.cellSize + cfg.cellMargin) + cfg.cellMargin * 1.5,
+            pixRatio = window.devicePixelRatio || 1,
+            ctx;
+        if (!cnvs) {
+            return;
+        }
         scale = pixRatio;
         ctx = cnvs.getContext("2d");
-        cnvs.width = size * pixRatio;
-        cnvs.height = size * pixRatio;
-        cnvs.style.width = size + 'px';
-        cnvs.style.height = size + 'px';
+        cnvs.width = w * pixRatio;
+        cnvs.height = h * pixRatio;
+        cnvs.style.width = w + 'px';
+        cnvs.style.height = h + 'px';
         if (pixRatio !== 1) {
             ctx.scale(pixRatio, pixRatio);
         }
         ctx.lineJoin = "bevel";
         ctx.lineCap = "square";
         ctx.fillStyle = "#ddd";
-        ctx.fillRect(0, 0, size, size);
-        drawField();
+        ctx.fillRect(0, 0, w, h);
+        _drawField(cnvs, field);
+        context[field.id] = { field: field, canvas: cnvs, ctx: ctx };
+        
+    }
+    
+    function initCanvas(mfield, nfield) {
+        _initCanvas(mfield);
+        _initCanvas(nfield);
     }
 
-    function drawBall(x, y, r, color) {
-        var grd = ctx.createRadialGradient(x - r * 0.2, y - r * 0.2, 0, x - r * 0.2, y - r * 0.2, r / 2);
+    function drawBall(id, x, y, r, color) {
+        var ctx = context[id].ctx,
+            grd = ctx.createRadialGradient(x - r * 0.2, y - r * 0.2, 0, x - r * 0.2, y - r * 0.2, r / 2);
         grd.addColorStop(0.0, "#f5f5f5");
         grd.addColorStop(1.0, color);
         ctx.shadowOffsetX = r * 0.1;
@@ -99,8 +113,9 @@ define(["field", "config"], function (field, config) {
         ctx.closePath();
     }
 
-    function eraseCell(i, j) {
-        var cell = field.field[field.idx(i, j)];
+    function eraseCell(id, i, j) {
+        var ctx = context[id].ctx,
+            cell = context[id].field.$(i, j);
         var x, y;
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 0;
@@ -113,6 +128,15 @@ define(["field", "config"], function (field, config) {
         ctx.stroke();
         ctx.fill();
         ctx.closePath();
+    }
+    
+    function drawNewBalls(colors, field) {
+        var i,
+            cell;
+        for (i = 0; i < 3; i++) {
+            cell = field.$(0, i);
+            drawBall(config.NEW_BALLS_CANVAS, cell.ballX, cell.ballY, 3 / 10 * cfg.cellSize, colors[i]);
+        }
     }
 
     var animPathState = {
@@ -138,7 +162,8 @@ define(["field", "config"], function (field, config) {
             cpath = animPathState.path,
             color = animPathState.color,
             k,
-            c;
+            c,
+            cnvs = context[config.MAIN_CANVAS].canvas;
         if (r < 0 && r + 2 > 0) {
             if (cpath && cpath[0]) {
                 evnt.detail.ball = cpath[0];
@@ -146,7 +171,7 @@ define(["field", "config"], function (field, config) {
                 for (k = 1; k < cpath.length; k++) {
                     c = cpath[k];
                     if (!c.color) {
-                        eraseCell(c.i, c.j);
+                        eraseCell(config.MAIN_CANVAS, c.i, c.j);
                     }
                 }
             }
@@ -154,8 +179,8 @@ define(["field", "config"], function (field, config) {
             for (k = 1; k < cpath.length; k++) {
                 c = cpath[k];
                 if (!c.color) {
-                    eraseCell(c.i, c.j);
-                    drawBall(c.ballX, c.ballY, animPathState.r, color);
+                    eraseCell(config.MAIN_CANVAS, c.i, c.j);
+                    drawBall(config.MAIN_CANVAS, c.ballX, c.ballY, animPathState.r, color);
                 }
             }
         }
@@ -167,12 +192,15 @@ define(["field", "config"], function (field, config) {
     };
 
     function animateSelected() {
-        var cell = sel;
-        var height;
-        var dir = -1;
-        var ch = animSelState.ch; // current height
-        var x, y;
-        var r  = 3 / 10 * cfg.cellSize;
+        var cell = sel,
+            height,
+            dir = -1,
+            ch = animSelState.ch, // current height
+            x,
+            y,
+            grd,
+            ctx = context[config.MAIN_CANVAS].ctx,
+            r  = 3 / 10 * cfg.cellSize;
         if (!cell) {
             return;
         }
@@ -180,7 +208,7 @@ define(["field", "config"], function (field, config) {
         x = cell.ballX;
         y = cell.ballY;
 
-        eraseCell(cell.i, cell.j);
+        eraseCell(config.MAIN_CANVAS, cell.i, cell.j);
         ch++;
         if (ch === height) {
             ch = 0;
@@ -189,7 +217,7 @@ define(["field", "config"], function (field, config) {
         animSelState.ch = ch;
         animSelState.dir = dir;
         y += ch * dir;
-        var grd = ctx.createRadialGradient(x - r * 0.2, y - r * 0.2, 0, x - r * 0.2, y - r * 0.2, r / 2);
+        grd = ctx.createRadialGradient(x - r * 0.2, y - r * 0.2, 0, x - r * 0.2, y - r * 0.2, r / 2);
         grd.addColorStop(0.0, "#f5f5f5");
         grd.addColorStop(1.0, cell.color);
         ctx.shadowOffsetX = r * 0.1;
@@ -206,14 +234,14 @@ define(["field", "config"], function (field, config) {
     }
     
     function moveBall(i, j, path) {
-        var start = field.field[field.idx(i, j)];
+        var start = context[config.MAIN_CANVAS].field.$(i, j);
         var color = start.color;
         var h;
         var dest = path[0];
         start.color = null;
-        eraseCell(i, j);
+        eraseCell(config.MAIN_CANVAS, i, j);
         dest.color = color;
-        drawBall(dest.ballX, dest.ballY, 3 / 10 * cfg.cellSize, color);
+        drawBall(config.MAIN_CANVAS, dest.ballX, dest.ballY, 3 / 10 * cfg.cellSize, color);
         path.push(start);
         animPathState.r = Math.floor(3 / 10 * cfg.cellSize / 2);
         animPathState.path = path;
@@ -246,8 +274,8 @@ define(["field", "config"], function (field, config) {
         }
         noPathWarn = document.createElement("div");
         noPathWarn.style.position = "absolute";
-        noPathWarn.style.width = cnvs.style.width;
-        noPathWarn.style.height = cnvs.style.height;
+        noPathWarn.style.width = context[config.MAIN_CANVAS].canvas.style.width;
+        noPathWarn.style.height = context[config.MAIN_CANVAS].canvas.style.height;
         noPathWarn.style.display = "flex";
         noPathWarn.style.justifyContent = "center";
         noPathWarn.style.alignItems = "center";
@@ -286,10 +314,10 @@ define(["field", "config"], function (field, config) {
     
     return {
         initCanvas: initCanvas,
-        drawField: drawField,
         drawBall: drawBall,
         eraseCell: eraseCell,
         moveBall: moveBall,
+        drawNewBalls: drawNewBalls,
         setSelection: function (cell) { sel = cell; },
         getSelection: function () { return sel; },
         warnNoPath: warnNoPath,

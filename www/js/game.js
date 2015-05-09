@@ -4,17 +4,21 @@ require.config({
 });
 
 /*global define:false, window:false */
-define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, config) {
+define(["draw", "field", "config", "3rd/domReady!"], function (draw, Field, config) {
     "use strict";
     var score = 0,
         cfg = config.draw,
         size = config.game.size,
         cnvs,
         sel,
-        scoreBoard;
+        scoreBoard,
+        field,
+        nfield;
 
     var isMoving = false, // if a move is being animated now
         pendingSelection = null; // if there was a selection during the move, keep track of it
+    
+    var nballs = [];
     
     var ih; // interval handler
     
@@ -108,9 +112,9 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
             var path = null;
             if (field.field[field.idx(i, j)].color) {   // if another ball is selected, redraw
                                                         // the ball and change selection
-                draw.eraseCell(sel.i, sel.j);
-                draw.drawBall(sel.ballX, sel.ballY, 3 / 10 * cfg.cellSize, sel.color);
-                draw.setSelection((sel = field.field[field.idx(i, j)]));
+                draw.eraseCell(config.MAIN_CANVAS, sel.i, sel.j);
+                draw.drawBall(config.MAIN_CANVAS, sel.ballX, sel.ballY, 3 / 10 * cfg.cellSize, sel.color);
+                draw.setSelection((sel = field.$(i, j)));
             } else {
                 if ((path = findPath(sel.i, sel.j, i, j)) !== null) {
                     isMoving = true;
@@ -188,7 +192,7 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
                     b;
                 for (b = 0; b < lineSorted.length; b++) {
                     lineSorted[b].color = null;
-                    draw.eraseCell(lineSorted[b].i, lineSorted[b].j);
+                    draw.eraseCell(config.MAIN_CANVAS, lineSorted[b].i, lineSorted[b].j);
                     killed++;
                 }
                 line.unshift(origin);
@@ -199,7 +203,7 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
         }
         if (killed) { // we have origin left at the beginning of the array
             line[0].color = null;
-            draw.eraseCell(line[0].i, line[0].j);
+            draw.eraseCell(config.MAIN_CANVAS, line[0].i, line[0].j);
             killed++;
 
             // update score
@@ -213,6 +217,15 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
         }
         return killed;
     }
+    
+    function genBalls() {
+        var i,
+            rndIdx;
+        for (i = 0; i < 3; i++) {
+            rndIdx = Math.floor(Math.random() * config.draw.colors.length);
+            nballs[i] = config.draw.colors[rndIdx];
+        }
+    }
 
     function newBalls() {
         var i;
@@ -220,39 +233,54 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
         function unoccupied(x, y) { if (!y.color) { x.push(y); } return x; }
         for (i = 0; i < 3; i++) {
             var ctx,
-                rndIdx1,
-                rndIdx2,
+                rndIdx,
                 avail = field.field.reduce(unoccupied, []),
                 s;
-            rndIdx1 = Math.floor(Math.random() * avail.length);
-            s = avail[rndIdx1];
-            rndIdx2 = Math.floor(Math.random() * config.draw.colors.length);
-            s.color = config.draw.colors[rndIdx2];
-            draw.drawBall(s.ballX, s.ballY, 3 / 10 * cfg.cellSize, s.color);
+            rndIdx = Math.floor(Math.random() * avail.length);
+            s = avail[rndIdx];
+            s.color = nballs[i];
+            draw.drawBall(config.MAIN_CANVAS, s.ballX, s.ballY, 3 / 10 * cfg.cellSize, s.color);
             if (!killBalls(s.i, s.j)) {
                 if (avail.length === 1) {
                     return -1;
                 }
             }
         }
+        genBalls();
         return 0;
+    }
+
+    // this module is loaded on DOM ready, DOM manipulations below are safe
+    function init() {
+        scoreBoard = document.getElementById("score");
+        cnvs = document.getElementById("playground");
+    }
+    
+    function start() {
+        field = new Field(config.MAIN_CANVAS, size, size);
+        nfield = new Field(config.NEW_BALLS_CANVAS, 1, 3);
+
+        draw.initCanvas(field, nfield);
+        genBalls();
+        newBalls();
+        draw.drawNewBalls(nballs, nfield);
+        draw.restartTimers();
     }
 
     function restartGame() {
         score = 0;
         updateScoreBoard();
-        field.initField();
-        draw.initCanvas(cnvs);
         draw.setSelection((sel = null));
-        draw.restartTimers();
-        newBalls();
+        start();
     }
     
     function checkAndInsert(evnt) {
         if (isMoving) {
             isMoving = false;
-            _selectAt(pendingSelection[0], pendingSelection[1]);
-            pendingSelection = null;
+            if (pendingSelection) {
+                _selectAt(pendingSelection[0], pendingSelection[1]);
+                pendingSelection = null;
+            }
         }
         if (!killBalls(evnt.detail.ball.i, evnt.detail.ball.j)) {
             if (newBalls() < 0) {
@@ -268,22 +296,29 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
                     window.alert("Game over...\n\nYour score is: " + score);
                 }
                 restartGame();
+            } else {
+                draw.drawNewBalls(nballs, nfield);
             }
         }
     }
     
-    // this module is loaded on DOM ready, DOM manipulations below are safe
-    cnvs = document.getElementById("playground");
-    scoreBoard = document.getElementById("score");
-    draw.initCanvas(cnvs);
-    var footer = document.getElementById("footer");
-    footer.style.width = cnvs.style.width;
-    scoreBoard.style.minWidth = scoreBoard.offsetWidth + "px";
-    scoreBoard.textContent = "0";
-    footer.style.visibility = "visible";
-    var restart = document.getElementById("restart");
-    newBalls();
-    cnvs.addEventListener("click", select);
-    cnvs.addEventListener("doneAnimating", checkAndInsert);
-    restart.addEventListener("click", restartGame);
+    function render() {
+        var footer = document.getElementById("footer");
+        footer.style.width = cnvs.style.width;
+        scoreBoard.style.minWidth = scoreBoard.offsetWidth + "px";
+        scoreBoard.textContent = "0";
+        footer.style.visibility = "visible";
+    }
+    
+    function bindEvents() {
+        var restart = document.getElementById("restart");
+        cnvs.addEventListener("click", select);
+        cnvs.addEventListener("doneAnimating", checkAndInsert);
+        restart.addEventListener("click", restartGame);
+    }
+    
+    init();
+    start();
+    render();
+    bindEvents();
 });
