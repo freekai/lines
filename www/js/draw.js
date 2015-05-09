@@ -135,6 +135,7 @@ define(["config"], function (config) {
             cell;
         for (i = 0; i < 3; i++) {
             cell = field.$(0, i);
+            eraseCell(config.NEW_BALLS_CANVAS, 0, i);
             drawBall(config.NEW_BALLS_CANVAS, cell.ballX, cell.ballY, 3 / 10 * cfg.cellSize, colors[i]);
         }
     }
