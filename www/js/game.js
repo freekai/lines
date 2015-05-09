@@ -247,6 +247,7 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, Field, conf
             }
         }
         genBalls();
+        draw.drawNewBalls(nballs, nfield);
         return 0;
     }
 
@@ -263,7 +264,6 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, Field, conf
         draw.initCanvas(field, nfield);
         genBalls();
         newBalls();
-        draw.drawNewBalls(nballs, nfield);
         draw.restartTimers();
     }
 
@@ -296,8 +296,6 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, Field, conf
                     window.alert("Game over...\n\nYour score is: " + score);
                 }
                 restartGame();
-            } else {
-                draw.drawNewBalls(nballs, nfield);
             }
         }
     }
