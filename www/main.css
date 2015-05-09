@@ -7,7 +7,7 @@ body {
 #footer {
     height: 40px;
     position: relative;
-    margin: 5px auto;
+    margin: 30px auto;
     visibility: hidden;
 }
 
@@ -36,8 +36,10 @@ a {
 }
 
 #nextballs-container {
-    display: inline;
+    display: flex;
+    float: left;
     position: absolute;
+    align-items: center;
     top: 0;
     left: 0;
     height: 40px;
