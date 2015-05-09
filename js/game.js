@@ -13,6 +13,8 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
         sel,
         scoreBoard;
 
+    var isMoving = false; // if a move is being animated now
+    
     var ih; // interval handler
     
     function minDist(i, j, graph) {
@@ -95,6 +97,13 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
     function select(event) {
         var x, y; // positions within the canvas
         var i, j; // matrix indices of the cell
+        
+        event.stopPropagation();
+        
+        // ignore selection if a ball is moving
+        if (isMoving) {
+            return;
+        }
 
         x = event.pageX + (window.pageXScroll || 0) - cnvs.offsetLeft;
         y = event.pageY + (window.pageYScroll || 0) - cnvs.offsetTop;
@@ -102,6 +111,10 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
         // NB: is not worth a separate function
         i = Math.floor(x / (cfg.cellSize + cfg.cellMargin));
         j = Math.floor(y / (cfg.cellSize + cfg.cellMargin));
+        
+        if (i >= size || j >= size) {
+            return;
+        }
 
         if (!sel) {
             // no selection. simply change selection to the picked cell if the ball
@@ -112,18 +125,19 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
             }
         } else {
             var path = null;
-            if (field.field[field.idx(i, j)].color) {   // if other ball is selected, redraw the
-                                            // ball and change selection
+            if (field.field[field.idx(i, j)].color) {   // if another ball is selected, redraw
+                                                        // the ball and change selection
                 draw.eraseCell(sel.i, sel.j);
                 draw.drawBall(sel.ballX, sel.ballY, 3 / 10 * cfg.cellSize, sel.color);
                 draw.setSelection((sel = field.field[field.idx(i, j)]));
-                return;
-            }
-            if ((path = findPath(sel.i, sel.j, i, j)) !== null) {
-                draw.moveBall(sel.i, sel.j, path);
-                draw.setSelection((sel = null));
             } else {
-                draw.warnNoPath();
+                if ((path = findPath(sel.i, sel.j, i, j)) !== null) {
+                    isMoving = true;
+                    draw.moveBall(sel.i, sel.j, path);
+                    draw.setSelection((sel = null));
+                } else {
+                    draw.warnNoPath();
+                }
             }
         }
     }
@@ -230,6 +244,7 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
     }
     
     function checkAndInsert(evnt) {
+        isMoving = false;
         if (!killBalls(evnt.detail.ball.i, evnt.detail.ball.j)) {
             if (newBalls() < 0) {
                 var maxScore = parseInt(localStorage.getItem("maxScore"), 10);
@@ -248,6 +263,7 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
         }
     }
     
+    // this module is loaded on DOM ready, DOM manipulations below are safe
     cnvs = document.getElementById("playground");
     scoreBoard = document.getElementById("score");
     draw.initCanvas(cnvs);
