@@ -13,7 +13,8 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
         sel,
         scoreBoard;
 
-    var isMoving = false; // if a move is being animated now
+    var isMoving = false, // if a move is being animated now
+        pendingSelection = null; // if there was a selection during the move, keep track of it
     
     var ih; // interval handler
     
@@ -94,27 +95,7 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
         return path;
     }
 
-    function select(event) {
-        var x, y; // positions within the canvas
-        var i, j; // matrix indices of the cell
-        
-        event.stopPropagation();
-        
-        // ignore selection if a ball is moving
-        if (isMoving) {
-            return;
-        }
-
-        x = event.pageX + (window.pageXScroll || 0) - cnvs.offsetLeft;
-        y = event.pageY + (window.pageYScroll || 0) - cnvs.offsetTop;
-
-        // NB: is not worth a separate function
-        i = Math.floor(x / (cfg.cellSize + cfg.cellMargin));
-        j = Math.floor(y / (cfg.cellSize + cfg.cellMargin));
-        
-        if (i >= size || j >= size) {
-            return;
-        }
+    function _selectAt(i, j) {
 
         if (!sel) {
             // no selection. simply change selection to the picked cell if the ball
@@ -142,7 +123,31 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
         }
     }
 
-    
+    function select(event) {
+        var x, y; // positions within the canvas
+        var i, j; // matrix indices of the cell
+        
+        event.stopPropagation();
+        
+        x = event.pageX + (window.pageXScroll || 0) - cnvs.offsetLeft;
+        y = event.pageY + (window.pageYScroll || 0) - cnvs.offsetTop;
+
+        // NB: is not worth a separate function
+        i = Math.floor(x / (cfg.cellSize + cfg.cellMargin));
+        j = Math.floor(y / (cfg.cellSize + cfg.cellMargin));
+        
+        if (i >= size || j >= size) {
+            return;
+        }
+
+        // ignore selection if a ball is moving
+        if (isMoving) {
+            pendingSelection = [i, j];
+        } else {
+            _selectAt(i, j);
+        }
+    }
+        
     function updateScoreBoard() {
         scoreBoard.innerHTML = score;
     }
@@ -244,7 +249,11 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, field, conf
     }
     
     function checkAndInsert(evnt) {
-        isMoving = false;
+        if (isMoving) {
+            isMoving = false;
+            _selectAt(pendingSelection[0], pendingSelection[1]);
+            pendingSelection = null;
+        }
         if (!killBalls(evnt.detail.ball.i, evnt.detail.ball.j)) {
             if (newBalls() < 0) {
                 var maxScore = parseInt(localStorage.getItem("maxScore"), 10);
