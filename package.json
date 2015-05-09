@@ -1,0 +1,22 @@
+{
+    "name": "lines",
+    "version": "0.1.0",
+    "description": "HTML5 lines game on canvas",
+    "homepage": "https://github.com/freekai/lines",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/freekai/lines/issues"
+    },
+    "author": {
+        "name": "Arzhan Kinzhalin",
+        "url": "http://kinzhalin.com"
+    },
+    "devDependencies": {
+        "grunt": "~0.4.5",
+        "grunt-contrib-jshint": "~0.11.0",
+        "grunt-contrib-copy": "~0.7.0",
+        "grunt-contrib-requirejs": "~0.4.4",
+        "grunt-ftp-deploy": "~0.1.9",
+        "fs-extra": "~0.16.3"
+    }
+}
