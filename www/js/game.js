@@ -273,7 +273,6 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, Field, conf
     function restartGame() {
         score = 0;
         updateScoreBoard();
-        draw.setSelection((sel = null));
         start();
     }
     
