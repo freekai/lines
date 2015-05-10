@@ -77,7 +77,7 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, Field, conf
                 ic = imin + _neighbors[k][0];
                 jc = jmin + _neighbors[k][1];
                 if (field.isInside(ic, jc) &&
-                        !field.field[field.idx(ic, jc)].color &&
+                        !field.$(ic, jc).color &&
                         graph[field.idx(ic, jc)]) {
 
                     alt = graph[minIdx].dist + 1;
@@ -176,16 +176,16 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, Field, conf
             dj = _line_directions[k][1];
             ic = pt.i + di;
             jc = pt.j + dj;
-            while (field.isInside(ic, jc) && field.field[field.idx(ic, jc)].color === pt.color) {
-                line.push(field.field[field.idx(ic, jc)]);
+            while (field.isInside(ic, jc) && field.$(ic, jc).color === pt.color) {
+                line.push(field.$(ic, jc));
                 ic += di;
                 jc += dj;
             }
             // reverse direction
             ic = pt.i - di;
             jc = pt.j - dj;
-            while (field.isInside(ic, jc) && field.field[field.idx(ic, jc)].color === pt.color) {
-                line.push(field.field[field.idx(ic, jc)]);
+            while (field.isInside(ic, jc) && field.$(ic, jc).color === pt.color) {
+                line.push(field.$(ic, jc));
                 ic -= di;
                 jc -= dj;
             }
