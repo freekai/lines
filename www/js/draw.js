@@ -1,4 +1,4 @@
-/*global define:false, window:false, document:false, setInterval:false, setTimeout:false, clearInterval:false, CustomEvent:false */
+/*global define:false, window:false, document:false, console: false, setInterval:false, setTimeout:false, clearInterval:false, CustomEvent:false */
 define(["config"], function (config) {
     "use strict";
     
@@ -248,6 +248,7 @@ define(["config"], function (config) {
         animPathState.path = path;
         animPathState.color = color;
         animPathState.stop = false;
+        animPathTimer = setInterval(animatePath, 100);
     }
     
     function _offset() {
@@ -300,17 +301,22 @@ define(["config"], function (config) {
         }, 20);
     }
     
-    function startTimers() {
-        animPathTimer = setInterval(animateSelected, 100);
-        animSelectTimer = setInterval(animatePath, 100);
+    document.getElementById(config.MAIN_CANVAS).addEventListener("doneAnimating", function () {
+        clearInterval(animPathTimer);
+    });
+    
+    function startAnimateSelection(cell) {
+        if (sel) {
+            console.log("selection exists", sel, "new: ", cell);
+            return;
+        }
+        sel = cell;
+        animSelectTimer = setInterval(animateSelected, 100);
     }
     
-    startTimers();
-    
-    function restartTimers() {
-        clearInterval(animPathTimer);
+    function stopAnimateSelection() {
+        sel = null;
         clearInterval(animSelectTimer);
-        startTimers();
     }
     
     return {
@@ -319,9 +325,8 @@ define(["config"], function (config) {
         eraseCell: eraseCell,
         moveBall: moveBall,
         drawNewBalls: drawNewBalls,
-        setSelection: function (cell) { sel = cell; },
-        getSelection: function () { return sel; },
-        warnNoPath: warnNoPath,
-        restartTimers: restartTimers
+        startAnimateSelection: startAnimateSelection,
+        stopAnimateSelection: stopAnimateSelection,
+        warnNoPath: warnNoPath
     };
 });

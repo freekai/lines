@@ -104,22 +104,26 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, Field, conf
         if (!sel) {
             // no selection. simply change selection to the picked cell if the ball
             // is there
-            if (field.field[field.idx(i, j)].color) {
-                draw.setSelection((sel = field.field[field.idx(i, j)]));
+            if (field.$(i, j).color) {
+                sel = field.$(i, j);
+                draw.startAnimateSelection(sel);
                 return;
             }
         } else {
-            var path = null;
-            if (field.field[field.idx(i, j)].color) {   // if another ball is selected, redraw
+            if (field.$(i, j).color) {   // if another ball is selected, redraw
                                                         // the ball and change selection
+                draw.stopAnimateSelection();
                 draw.eraseCell(config.MAIN_CANVAS, sel.i, sel.j);
                 draw.drawBall(config.MAIN_CANVAS, sel.ballX, sel.ballY, 3 / 10 * cfg.cellSize, sel.color);
-                draw.setSelection((sel = field.$(i, j)));
+                sel = field.$(i, j);
+                draw.startAnimateSelection(sel);
             } else {
+                var path = null;
                 if ((path = findPath(sel.i, sel.j, i, j)) !== null) {
                     isMoving = true;
+                    draw.stopAnimateSelection();
                     draw.moveBall(sel.i, sel.j, path);
-                    draw.setSelection((sel = null));
+                    sel = null;
                 } else {
                     draw.warnNoPath();
                 }
@@ -264,7 +268,6 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, Field, conf
         draw.initCanvas(field, nfield);
         genBalls();
         newBalls();
-        draw.restartTimers();
     }
 
     function restartGame() {
