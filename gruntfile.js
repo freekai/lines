@@ -18,7 +18,7 @@ module.exports = function (grunt) {
                     optimize: "uglify2",
                     uglify2: {
                         output: {
-                            preamble: "/*\n * Copyright 2015 Arzhan Kinzhalin\n * Licensed under MIT license\n */"
+                            preamble: "/*\n * Copyright (c) 2015 Arzhan \"kai\" Kinzhalin\n * Licensed under MIT license\n */"
                         },
                         mangle: true
                     },
