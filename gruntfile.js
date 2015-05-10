@@ -10,19 +10,22 @@ module.exports = function (grunt) {
         requirejs: {
             build: {
                 options: {
-                    appDir: "www",
-                    baseUrl: "./",
-                    dir: "<%= dst %>",
-                    optimize: "uglify2",
-                    generateSourceMaps: false,
-                    useSourceUrl: true,
+                    baseUrl: "www/js",
+                    out: "<%= dst %>/js/game.js",
+                    useSourceUrl: false,
                     preserveLicenseComments: false,
-                    useStrict: true,
-                    uglify2: {},
+                    removeCombined: false,
+                    optimize: "uglify2",
+                    uglify2: {
+                        output: {
+                            preamble: "/*\n * Copyright 2015 Arzhan Kinzhalin\n * Licensed under MIT license\n */"
+                        },
+                        mangle: true
+                    },
                     optimizeCss: "standard",
-                    module: {
-                        name: "js/game"
-                    }
+                    include: [
+                        "game"
+                    ]
                 }
             }
         },
@@ -35,7 +38,7 @@ module.exports = function (grunt) {
                         dest: "<%= dst %>",
                         src: [
                             "index.html",
-                            "js/3rd/*",
+                            "js/3rd/require.js",
                             "main.css"
                         ]
                     }
