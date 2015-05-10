@@ -273,6 +273,10 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, Field, conf
     function restartGame() {
         score = 0;
         updateScoreBoard();
+        if (sel) {
+            sel = null;
+            draw.stopAnimateSelection();
+        }
         start();
     }
     
