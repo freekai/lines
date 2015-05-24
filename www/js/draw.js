@@ -99,7 +99,11 @@ define(["config"], function (config) {
         var ctx = context[id].ctx,
             grd = ctx.createRadialGradient(x - r * 0.2, y - r * 0.2, 0, x - r * 0.2, y - r * 0.2, r / 2);
         grd.addColorStop(0.0, "#f5f5f5");
-        grd.addColorStop(1.0, color);
+        try {
+            grd.addColorStop(1.0, color);
+        } catch (e) {
+            console.error("Color", color, e);
+        }
         ctx.shadowOffsetX = r * 0.1;
         ctx.shadowOffsetY = r * 0.1;
         ctx.shadowBlur = r * 0.1;
@@ -220,7 +224,11 @@ define(["config"], function (config) {
         y += ch * dir;
         grd = ctx.createRadialGradient(x - r * 0.2, y - r * 0.2, 0, x - r * 0.2, y - r * 0.2, r / 2);
         grd.addColorStop(0.0, "#f5f5f5");
-        grd.addColorStop(1.0, cell.color);
+        try {
+            grd.addColorStop(1.0, cell.color);
+        } catch (e) {
+            console.error("Cell", cell, e);
+        }
         ctx.shadowOffsetX = r * 0.1;
         ctx.shadowOffsetY = r * 0.1 + ch;
         ctx.shadowBlur = r * 0.1;
