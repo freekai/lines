@@ -1,9 +1,8 @@
-/*global define:false, require: false, document:false, localStorage: false */
+/*global define:false, require: false, window:false, document:false, localStorage: false */
 require.config({
     baseUrl: "js"
 });
 
-/*global define:false, window:false */
 define(["draw", "field", "config", "3rd/domReady!"], function (draw, Field, config) {
     "use strict";
     var score = 0,
@@ -196,6 +195,9 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, Field, conf
                     b;
                 for (b = 0; b < lineSorted.length; b++) {
                     lineSorted[b].color = null;
+                    if (pendingSelection === field.$(lineSorted[b].i, lineSorted[b].j)) {
+                        pendingSelection = null;
+                    }
                     draw.eraseCell(config.MAIN_CANVAS, lineSorted[b].i, lineSorted[b].j);
                     killed++;
                 }
@@ -283,10 +285,6 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, Field, conf
     function checkAndInsert(evnt) {
         if (isMoving) {
             isMoving = false;
-            if (pendingSelection) {
-                _selectAt(pendingSelection[0], pendingSelection[1]);
-                pendingSelection = null;
-            }
         }
         if (!killBalls(evnt.detail.ball.i, evnt.detail.ball.j)) {
             if (newBalls() < 0) {
@@ -304,6 +302,11 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, Field, conf
                 restartGame();
             }
         }
+        if (pendingSelection) {
+            _selectAt(pendingSelection[0], pendingSelection[1]);
+            pendingSelection = null;
+        }
+
     }
     
     function render() {
