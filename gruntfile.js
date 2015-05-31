@@ -18,7 +18,7 @@ module.exports = function (grunt) {
                     optimize: "uglify2",
                     uglify2: {
                         output: {
-                            preamble: "/*\n * Copyright (c) 2015 Arzhan \"kai\" Kinzhalin\n * Licensed under MIT license\n */"
+                            preamble: "/*\n * Copyright (c) 2015 Arzhan \"kai\" Kinzhalin. All rights reserved.\n * Licensed under MIT license\n */"
                         },
                         mangle: true
                     },
@@ -53,7 +53,7 @@ module.exports = function (grunt) {
                     authKey: "secret"
                 },
                 src: "dist",
-                dest: "public_html/family/lines",
+                dest: "public_html/lines",
                 exclusions: ["build.txt"]
             }
         }
