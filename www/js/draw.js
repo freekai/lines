@@ -152,7 +152,7 @@ define(["config"], function (config) {
     };
     
     var evnt = new CustomEvent(
-        "doneAnimating",
+        "moveCompleted",
         {
             detail: {
                 ball: null
@@ -309,7 +309,7 @@ define(["config"], function (config) {
         }, 20);
     }
     
-    document.getElementById(config.MAIN_CANVAS).addEventListener("doneAnimating", function () {
+    document.getElementById(config.MAIN_CANVAS).addEventListener("moveCompleted", function () {
         clearInterval(animPathTimer);
     });
     

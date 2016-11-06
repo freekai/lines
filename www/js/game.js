@@ -320,7 +320,7 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, Field, conf
     function bindEvents() {
         var restart = document.getElementById("restart");
         cnvs.addEventListener("click", select);
-        cnvs.addEventListener("doneAnimating", checkAndInsert);
+        cnvs.addEventListener("moveCompleted", checkAndInsert);
         restart.addEventListener("click", restartGame);
     }
     
