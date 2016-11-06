@@ -293,13 +293,17 @@ define(["draw", "field", "config", "3rd/domReady!"], function (draw, Field, conf
                     localStorage.setItem("maxScore", 0);
                     maxScore = 0;
                 }
-                if (score > maxScore) {
-                    localStorage.setItem("maxScore", score);
-                    window.alert("Congratulations!\n\nNew record: " + score);
-                } else {
-                    window.alert("Game over...\n\nYour score is: " + score);
-                }
-                restartGame();
+                // Chrome does not finish drawing canvas if window.alert is
+                // shown synchronously, so debounce it.
+                setTimeout(function () {
+                    if (score > maxScore) {
+                        localStorage.setItem("maxScore", score);
+                            window.alert("Congratulations!\n\nNew record: " + score);
+                    } else {
+                            window.alert("Game over...\n\nYour score is: " + score);
+                    }
+                    restartGame();
+                }, 0);
             }
         }
         if (pendingSelection) {
